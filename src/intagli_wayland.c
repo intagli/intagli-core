@@ -1,5 +1,5 @@
 #include "intagli/intagli_wayland.h"
-#include "intagli/internal.h"
+#include "intagli/intagli_wayland_internal.h"
 
 void _iglXdgToplevelConfigure(void *data, struct xdg_toplevel *xdgToplevel, int32_t width, int32_t height, struct wl_array *states)
 {
