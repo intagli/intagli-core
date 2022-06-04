@@ -1,7 +1,7 @@
 #include "intagli/intagli_wayland.h"
 #include "intagli/internal.h"
 
-void _iglInternal_XdgToplevelConfigure(void *data, struct xdg_toplevel *xdgToplevel, int32_t width, int32_t height, struct wl_array *states)
+void _iglXdgToplevelConfigure(void *data, struct xdg_toplevel *xdgToplevel, int32_t width, int32_t height, struct wl_array *states)
 {
 	struct iglWaylandWindow *w = data;
 
@@ -34,26 +34,26 @@ void _iglInternal_XdgToplevelConfigure(void *data, struct xdg_toplevel *xdgTople
 		wl_egl_window_resize(w->wlEGLWindow, w->size.x, w->size.y, 0, 0);
 }
 
-void _iglInternal_XdgToplevelClose(void *data, struct xdg_toplevel *xdgToplevel)
+void _iglXdgToplevelClose(void *data, struct xdg_toplevel *xdgToplevel)
 {
 	struct iglWaylandWindow *w = data;
 	w->state.shouldClose = true;
 }
 
-void _iglInternal_XdgSurfaceConfigure(void *data, struct xdg_surface *surface, uint32_t name)
+void _iglXdgSurfaceConfigure(void *data, struct xdg_surface *surface, uint32_t name)
 {
 	struct iglWaylandWindow *w = data;
 	xdg_surface_ack_configure(surface, name);
 	w->xdgSurfaceConfigureFlag = false;
 }
 
-void _iglInternal_XdgWmBasePing(void *data, struct xdg_wm_base *shell, uint32_t name)
+void _iglXdgWmBasePing(void *data, struct xdg_wm_base *shell, uint32_t name)
 {
 	xdg_wm_base_pong(shell, name);
 }
 
 //Wayland Callback function manages window states
-void _iglInternal_CallbackWaylandRegistryAddObject(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version)
+void _iglCallbackWaylandRegistryAddObject(void *data, struct wl_registry *registry, uint32_t name, const char *interface, uint32_t version)
 {
 	struct iglWaylandWindow *w = data;
 	if (strcmp(interface, "wl_compositor") == 0)
@@ -67,7 +67,7 @@ void _iglInternal_CallbackWaylandRegistryAddObject(void *data, struct wl_registr
 	}
 }
 
-void _iglInternal_CallbackWaylandRegistryRemoveObject(void *data, struct wl_registry *registry, uint32_t name)
+void _iglCallbackWaylandRegistryRemoveObject(void *data, struct wl_registry *registry, uint32_t name)
 {
 	//
 }
@@ -78,19 +78,19 @@ void iglWaylandInitWindow(struct iglWaylandWindow* window)
 	window->xdgWmBase = NULL;
 	
 	//Registry Listener
-	window->wlRegistryListener.global = _iglInternal_CallbackWaylandRegistryAddObject;
-	window->wlRegistryListener.global_remove = _iglInternal_CallbackWaylandRegistryRemoveObject;
+	window->wlRegistryListener.global = _iglCallbackWaylandRegistryAddObject;
+	window->wlRegistryListener.global_remove = _iglCallbackWaylandRegistryRemoveObject;
 	
 	//XDG-WM-BASE Listener
-	window->XdgWmBaseListener.ping = _iglInternal_XdgWmBasePing;	
+	window->XdgWmBaseListener.ping = _iglXdgWmBasePing;	
 	
 	//XDG-SURFACE Listener
-	window->xdgSurfaceListener.configure = _iglInternal_XdgSurfaceConfigure;
+	window->xdgSurfaceListener.configure = _iglXdgSurfaceConfigure;
 	window->wlDisplay = wl_display_connect(NULL);
 	
 	//XDG-TOPLEVEL Listener	
-	window->xdgToplevelListener.configure = _iglInternal_XdgToplevelConfigure;
-	window->xdgToplevelListener.close = _iglInternal_XdgToplevelClose;
+	window->xdgToplevelListener.configure = _iglXdgToplevelConfigure;
+	window->xdgToplevelListener.close = _iglXdgToplevelClose;
 	
 	//Registry
 	window->wlRegistry = wl_display_get_registry(window->wlDisplay);
@@ -217,7 +217,7 @@ void iglWaylandRender(struct iglWaylandWindow* window)
 	}
 
 	//Destroy Cairo
-	cairo_destroy(window->cairo.cairo);	
+	cairo_destroy(window->cairo.cairo);
 }
 
 void iglWaylandDestroyWindow(struct iglWaylandWindow* window)
